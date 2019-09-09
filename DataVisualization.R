@@ -5,6 +5,7 @@ library(psych)
 library(tidyr)
 library(dplyr)
 library(ggridges)
+library(ggpubr)
 data <- readRDS("./data/data_final.RDS")
 
 
@@ -17,39 +18,43 @@ df_test = data$train
 # TODO izpiši tabelo informacij za podatke
 
 # Histograms for numerical data
-ggplot(df_test, aes(x=TransactionAmt, fill=isFraud)) + geom_histogram(binwidth = 10) + scale_x_continuous(limits = c(0, 1000)) + theme_minimal()
-
+p = ggplot(df_test, aes(x=TransactionAmt, fill=isFraud)) + geom_histogram(binwidth = 10) + scale_x_continuous(limits = c(0, 1000)) + theme_minimal()
+ggsave("./slike/transactionAmt.pdf", p, width = 6, height = 6)
 
 ### Card Variables
-ggplot(df_test, aes(x=card1, fill=isFraud)) + geom_histogram(binwidth = 100) + theme_minimal()
-ggplot(df_test, aes(x=card2, fill=isFraud)) + geom_histogram(binwidth = 5) + theme_minimal()
-ggplot(df_test, aes(x=card5, fill=isFraud)) + geom_histogram(binwidth = 5 ) + theme_minimal()
-ggplot(df_test, aes(x=card6, fill=isFraud)) + geom_bar() + theme_minimal()
+p1 = ggplot(df_test, aes(x=card1, fill=isFraud)) + geom_histogram(binwidth = 100, show.legend = FALSE) + theme_minimal() + theme(legend.title = element_blank())
+p2 = ggplot(df_test, aes(x=card2, fill=isFraud)) + geom_histogram(binwidth = 5, show.legend = FALSE) + theme_minimal() + theme(legend.title = element_blank())
+p3 = ggplot(df_test, aes(x=card5, fill=isFraud)) + geom_histogram(binwidth = 5 ,show.legend = FALSE) + theme_minimal() + theme(legend.title = element_blank())
+p4 = ggplot(df_test, aes(x=card6, fill=isFraud)) + geom_bar(show.legend = FALSE) + theme_minimal() + theme(legend.title = element_blank())
+
+skp = ggarrange(p1, p2, p3, p4, ncol=2, nrow = 2)
+ggsave("./slike/card.pdf", skp, width = 6, height = 6)
 
 ### Email domains
 #ggplot(data=df_test, aes(x=P_emaildomain, fill=isFraud)) + geom_bar() +  theme_minimal()
 
 # Prikazemo le bolj pogoste vrednosti
-df_test %>%
+
+p = df_test %>%
   group_by(P_emaildomain) %>%
   mutate(group_num = n()) %>%
-  dplyr::filter(group_num >= 2000) %>%
-  ggplot(aes(x=P_emaildomain, fill=isFraud)) + geom_bar() +  theme_minimal()
+  dplyr::filter(group_num >= 3000) %>%
+  ggplot(aes(x=P_emaildomain, fill=isFraud)) + geom_bar() +  theme_minimal() 
 
-
+ggsave("./slike/email.pdf", p, width = 6, height = 6)
 ## V variables
 
-df_test %>% select(V76, V78, V83, V283, V285, V294, V296, isFraud) %>% gather(Spremenljivke, value, -isFraud) %>% 
+p = df_test %>% select(V76, V78, V83, V283, V285, V294, V296, isFraud) %>% gather(Spremenljivke, value, -isFraud) %>% 
   ggplot(aes(y = Spremenljivke, fill = as.factor(isFraud),x = percent_rank(value))) + geom_density_ridges(scale=1) 
 
-
+ggsave("./slike/v_variables.pdf", p, width = 6, height = 6)
 
 
 ## C variables
-df_test %>% select(C1, C2, C6, C9, C11, C13, C14, isFraud) %>% gather(Spremenljivke, value, -isFraud) %>% 
+p =df_test %>% select(C1, C2, C6, C9, C11, C13, C14, isFraud) %>% gather(Spremenljivke, value, -isFraud) %>% 
   ggplot(aes(y = Spremenljivke, fill = as.factor(isFraud), x = percent_rank(value)))  + geom_density_ridges(scale=1)
 + labs(x = "Normalizirane vrednosti", y="Spremenljivke")
-  
+ggsave("./slike/c_variables.pdf", p, width = 6, height = 6)
 
 
 
@@ -58,7 +63,10 @@ df_test %>% select(C1, C2, C6, C9, C11, C13, C14, isFraud) %>% gather(Spremenlji
 df_numeric = df_test[, c("TransactionAmt", "card1", "card2", "card5", "card5","V76", "V78", "V83", "V283", "V285", "V294", "V296",
                          "C1", "C2", "C6", "C9", "C11", "C13", "C14")]
 M = cor(df_numeric)
-corrplot::corrplot(M, method = "color")
+library(ggcorrplot)
+p = ggcorrplot(M)
+ggsave("./slike/korelacijska_matrika.pdf", p, width = 6, height = 6)
+
 
 
 
@@ -66,14 +74,9 @@ corrplot::corrplot(M, method = "color")
 describe(df_test[, c("TransactionAmt", "card1", "card2", "card5", "card5","V76", "V78", "V83", "V283", "V285", "V294", "V296",
                      "C1", "C2", "C6", "C9", "C11", "C13", "C14")])
 
-# Tabela za isFraud
-
-table(as.character(df_test$isFraud))
-#kable(data.frame(tbl),col.names = c("skupina","število"), caption="število enot v skupinah")
 
 
-# Za printat tabelo
-
+# Za printat tabelo v Rmd
 # 
 # ```{r,echo=FALSE}
 # povzetek <- as.data.frame(psych::describe(podatki[, kratkaImena]))
@@ -82,29 +85,21 @@ table(as.character(df_test$isFraud))
 #   kable_styling(bootstrap_options = c("striped", "condensed",  "responsive","bordered"),full_width = F)
 # ```
 
-# Staro
-ggplot(df_test, aes(x=C13, fill=isFraud)) + geom_histogram(binwidth = 15) + scale_x_continuous(limits = c(-30, 1000))
-length(unique(df_test$card5))
+
+# Tabela za isFraud
+table(as.character(df_test$isFraud))
+#kable(data.frame(tbl),col.names = c("skupina","število"), caption="število enot v skupinah")
 
 
-ggplot(df_test, aes(x=C14, fill=isFraud)) + geom_histogram() + scale_x_continuous(limits = c(-10, 200))
-ggplot(df_test, aes(x=V294, fill=isFraud)) + geom_histogram()  + scale_x_continuous(limits = c(-2, 30))
-ggplot(df_test, aes(x=C2, fill=isFraud)) + geom_histogram() + scale_x_continuous(limits = c(-10, 300))
-ggplot(df_test, aes(x=C1, fill=isFraud)) + geom_histogram() + scale_x_continuous(limits = c(-10, 300))
-ggplot(df_test, aes(x=C6, fill=isFraud)) + geom_histogram() + scale_x_continuous(limits = c(-10, 300))
-ggplot(df_test, aes(x=C11, fill=isFraud)) + geom_histogram()  + scale_x_continuous(limits = c(-10, 300))
-ggplot(df_test, aes(x=V296, fill=isFraud)) + geom_histogram() + scale_x_continuous(limits = c(-1, 15))
-ggplot(df_test, aes(x=C9, fill=isFraud)) + geom_histogram() + scale_x_continuous(limits = c(-10, 150))
-ggplot(df_test, aes(x=V285, fill=isFraud)) + geom_histogram() + scale_x_continuous(limits = c(-1, 30))
+# Za printat tabelo
+# 
+# ```{r,echo=FALSE}
+# povzetek <- as.data.frame(psych::describe(podatki[, kratkaImena]))
+# 
+# knitr::kable(round(povzetek[,c(2, 3, 4, 5, 8, 9, 10, 11, 12)],2),"latex") %>%
+#   kable_styling(bootstrap_options = c("striped", "condensed",  "responsive","bordered"),full_width = F)
+# ```
 
-# Barplot for factor data, TODO prikazi samo faktorje z večjimi deleži
-
-
-ggplot(data=df_test, aes(x=as.factor(V83), fill=isFraud)) + geom_bar()
-ggplot(data=df_test, aes(x=as.factor(V76), fill=isFraud)) + geom_bar()
-ggplot(data=df_test, aes(x=as.factor(V78), fill=isFraud)) + geom_bar()
-ggplot(data=df_test, aes(x=as.factor(V296), fill=isFraud)) + geom_bar()
-ggplot(data=df_test, aes(x=as.factor(V283), fill=isFraud)) + geom_bar()
 
 
 
