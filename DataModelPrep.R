@@ -58,6 +58,9 @@ x_test <- df$x_test
 y_train <- df$y_train
 y_test <- df$y_test
 
-res <- list(neuralnetwork = nn.confusion,
-            autoencoder = ae.confusion)
-res
+res <- list(actual = y_test,
+            neuralnetwork = pred_nn,
+            autoencoder = pred_ae)
+
+saveRDS(res, './data/pred_nn_ae.RDS')
+        

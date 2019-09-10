@@ -1,6 +1,7 @@
 library(keras)
 library(caret)
-
+library(deepviz)
+library(magrittr)
 
 nn <- keras_model_sequential()
 nn %>%
@@ -29,7 +30,7 @@ early_stopping <- callback_early_stopping(patience = 5)
 history_nn <- nn %>% fit(
   x = x_train, 
   y = y_train, 
-  epochs = 5, 
+  epochs = 100, 
   batch_size = 128,
   validation_data = list(x_test, y_test), 
   callbacks = list(checkpoint, early_stopping)
@@ -40,11 +41,14 @@ plot(history)
 pred_train <- predict(nn, x_train)
 pred_test <- predict(nn, x_test)
 
-nn.confusion <- confusionMatrix(as.factor(round(pred_test)), as.factor(y_test), mode = 'prec_recall', positive = '1')
+pred_nn <- as.numeric(round(pred_test))
+
+nn.confusion <- confusionMatrix(as.factor(pred_nn), as.factor(y_test), mode = 'prec_recall', positive = '1')
+
 
 
 
 
 plot_model(model, to_file='neuralnetwork.png')
 
-model %>% plot_model()
+nn %>% plot_model()

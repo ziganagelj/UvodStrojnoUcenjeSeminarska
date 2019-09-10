@@ -13,7 +13,7 @@ ae %>%
   layer_dense(units = 15, activation = "tanh") %>%
   layer_dense(units = ncol(x_train))
 
-summary(model)
+summary(ae)
 
 ae %>% compile(
   loss = "mean_squared_error", 
@@ -66,5 +66,5 @@ qplot(possible_k, all[, 'F1'], geom = "line") + labs(x = "Threshold", y = "F1") 
 
 k <- round(possible_k[which.max(all[, 'F1'])], 2)
 
-
-ae.confusion <- confusionMatrix(as.factor(as.numeric(mse_test > k)), as.factor(y_test), mode = 'prec_recall', positive = '1')
+pred_ae <- as.numeric(mse_test > k)
+ae.confusion <- confusionMatrix(as.factor(pred_ae), as.factor(y_test), mode = 'prec_recall', positive = '1')

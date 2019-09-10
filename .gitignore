@@ -2,3 +2,10 @@
 .Rhistory
 .RData
 .Ruserdata
+tmp.RData
+porocilo.tex
+porocilo.synctex.gz
+porocilo.log
+porocilo-concordance.tex
+nn.hdf5
+autoencoder.hdf5

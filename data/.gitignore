@@ -1,2 +1,8 @@
 data_complete.csv
 data_complete.rds
+sample_submission.csv
+test_identity.csv
+test_transaction.csv
+train_identity.csv
+train_transaction.csv
+conf_table_nn_ae.RDS
