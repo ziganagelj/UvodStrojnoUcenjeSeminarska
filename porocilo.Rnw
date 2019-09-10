@@ -31,8 +31,8 @@
 \SweaveOpts{concordance=TRUE}
 
 
-\title{\Large{Instrument Situation Dependence}}
-\author{Ž. Nagelj, A. Košir}
+\title{\Large{Primerjava klasifikacijskih modelov na neuravnoteženih podatkih}}
+\author{Ž. Nagelj, L. Lončarič}
 \date{\today}
 \maketitle
 
