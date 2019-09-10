@@ -20,6 +20,7 @@ lbl = c("TransactionAmt", "card1", "card2", "card5", "card6", "P_emaildomain","V
 accuracy_0 = NULL
 accuracy_1 = NULL
 
+# Za risanje scree diagrama
 for (i in 1:15) {
   
   print(i)
@@ -55,6 +56,7 @@ apply(df_train, 2, function(x) any(is.na(x)))
 
 lbl = c("TransactionAmt", "card1", "card2", "card5", "card6", "P_emaildomain","V76", "V78", "V83", "V283", "V285", "V294", "V296", "C1", "C2", "C6", "C9", "C11", "C13", "C14")
 
+# Treniranje knn
 knn_model = knn(df_train[,lbl], df_test[,lbl], cl=df_train$y_train,k=1, prob = TRUE);
 knn_prob = attr(knn_model, "prob");
 knn_cm = table(knn_model, df_test$y_test)
@@ -88,7 +90,6 @@ data.frame(precision, recall, f1)
 data.frame(mean(precision), mean(recall), mean(f1))
 
 
-
-log_confusion <- confusionMatrix(as.factor(glm_pred), as.factor(df_test_sub$y_test), mode = 'prec_recall', positive = '1')
-saveRDS(log_confusion, file = "log_pred.RDS")
-readRDS("./data/log_pred.RDS")
+log_confusion <- confusionMatrix(as.factor(knn_model), as.factor(df_test$y_test), mode = 'prec_recall', positive = '1')
+saveRDS(log_confusion, file = "knn_pred.RDS")
+readRDS("./data/knn_pred.RDS")

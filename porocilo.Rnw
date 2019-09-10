@@ -93,9 +93,9 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 
 \newpage
 \subsection{Vizualizacija izbiranih spremenljivk}
-\subsection*{TransactionAMT}
+\subsection*{TransactionAmt}
 
-***
+TransactionAmt oz. vrednost prenešenega denarja je edina prava zvezna spremenljivka v naših podatkih. Vidimo, da je spremenljvika približno eksponentno porazdeljena, s barvo, so v vsakem stolpcu označeni deleži transakcij, katere so bile klasificirane kot goljufije. Iz grafa vidimo, da se večina teh zgodi, kadar je vrednost transakcije med 0 in 125.
 
 \begin{figure}[h]
   \centering
@@ -110,7 +110,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 \newpage
 \subsection*{Card}
 
-***
+Spremenljivke tipa \textit{card} skupaj sestavljajo indentifikacijske številke kartic, razen zadnje spremenljivke, ki podaja vrsto kartice. Govoriti o porazdelitvah tukaj nima ravno smisla, saj te vrednosti ne predstavljajo neke zvezne količine. Iz zadnjega grafa vidimo, da imamo v našem vzorcu veliko več transakcij z debitnimi karticami kot pa z kreditnimi.
 
 \begin{figure}[h]
   \centering
@@ -125,7 +125,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 \newpage
 \subsection*{Email domain}
 
-***
+Email domena je kategorična spremenljivka povezana s transakcijo. Na spodnjem grafu so prikazane le najbolj zastopane skupine. Najbolj zastopana skupina je pričakovano gmail.com, sledi ji pa yahoo.com, ki imata številčno gledano tudi največ goljufivih transakcij.
 
 \begin{figure}[h]
   \centering
@@ -140,7 +140,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 \newpage
 \subsection*{C}
 
-***
+Spremenljivke tipa C so pravtako kodirane spremenljivke, ki naj bi "merile" atribute kot so število asociranih računov s plačilno kartico. Iz normiranih histogramov vidimo, da so vse spremenljivke zelo podobno porazdeljene.
 
 \begin{figure}[h]
   \centering
@@ -155,7 +155,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 \newpage
 \subsection*{V}
 
-***
+Spremenljivke tipa V so "custom" spremenljivke, ki jih je organizator natečaja "meril" pri transakcijah. Spremenljivke so pravtako zakodirane, zato ne vemo njihovega pravega pomena. Iz normiranih histogramov vidimo, da so spremenljivke V83, V78, V76 podobno porazdeljene, največ vrednosti se nahaja na sredni. Ostalie štiri spremenljivke so tudi medseboj podobno porazdeljene. Iz normiranih histogramov ne moremo razbrati, nobene znane, porazdelitve.
 
 \begin{figure}[h]
   \centering
@@ -170,7 +170,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 \newpage
 \subsection*{Correlation}
 
-***
+Iz grafa korelacijske matrike vidimo, da so spremenljivke tipa C zelo močno korelirane med seboj, kar lahko nakazuje na probleme s multikolinearnostjo. Spremenljivke tipa V so medseboj šibko korelirane. Ostale korelacije niso značilne.
 
 \begin{figure}[h]
   \centering
@@ -185,6 +185,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 
 \newpage
 \section{Rezultati}
+
 Ogledali si bomo rezultate štirih različnih modelov in dveh na podlagi glasovanja. Pri delu z neuravnoteženimi podatki se moramo zavedati zavedljivosti klasifikacijske točnosti. Zato je potrebno, da poznamo dve številki in sicer delež pravilno uvrščenih enot v primeru, da vse enote razvrstimo v skupino 0 (ni prevara) in delež pravilno razvrščenih enot v primeru naključnega razvrščanja ob predpostavki, da so populacijski deleži enaki vzorčnim. Naši referenčni vrednosti sta torej 0.98 in 0.96.  V takšnem primeru je pomemben tudi tip napake oziroma ali se gre za False Positive ali False Negative. Zato bomo poleg klasifikacijske točnosti primerjali tudi Precision (manjhna vrednost nakazuje na veliko število False Positive napak) in Recall (manjhna vrednost nakazuje na veliko število False Negative napak). Ogledali si bomo F1 Score, ki združi prej omenjeni metriki. Vsi modeli so bili ocenjeni na standariziranih podatkih, kakovost modela pa je bila vrednotena na ločeni, testni množici podatkov, ki ni bila del eksploratorne analize in ocenjevanja modela.
 
 \newpage
