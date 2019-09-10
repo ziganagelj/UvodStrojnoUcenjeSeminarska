@@ -1,0 +1,305 @@
+\documentclass[letterpaper,11pt]{article}
+\usepackage[english]{babel} %slovene
+\usepackage[utf8]{inputenc}
+\usepackage{tabularx} % extra features for tabular environment
+\usepackage[margin=1in,letterpaper]{geometry} % decreases margins
+% \usepackage{cite} % takes care of citations
+\usepackage[final]{hyperref} % adds hyper links inside the generated pdf file
+\usepackage{graphicx}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{subcaption}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{natbib}
+\setlength{\parindent}{0pt}
+\graphicspath{ {./slike/} }
+
+% https://www.overleaf.com/project/5c33a36d705dd34ecb9180c2
+
+\hypersetup{
+	colorlinks=true,       % false: boxed links; true: colored links
+	linkcolor=blue,        % color of internal links
+	citecolor=blue,        % color of links to bibliography
+	filecolor=magenta,     % color of file links
+	urlcolor=blue         
+}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+
+\title{\Large{Primerjava klasifikacijskih modelov na neuravnoteženih podatkih}}
+\author{Ž. Nagelj, L. Lončarič}
+\date{\today}
+\maketitle
+
+<<echo=FALSE, results=hide>>=
+library(xtable)
+library(caret)
+#cronbach1_simulated <- readRDS("./rds/cronbach1_simulated.rds")
+#povzetek <- readRDS("./rds/povzetek_10_uprasanj.rds")
+pred <- readRDS('./data/pred_nn_ae.RDS')
+@
+
+
+\section{Uvod}\label{Sec_Intro}
+Cilj naloge je predstaviti in primerjati štiri različnih metod za klasifikacijo na primeru neuravnovešenih podatkov. Gre se za več kot 500 tistoč transakcijskih podatkov različnih tipov na podlagi katerih želimo zaznati prevaro. Za konec bomo v primerjavo dodali še enasamble modelov in sicer v primeru večine glasov ter konsenza.
+
+\section{Podatki}\label{Sec_Data}
+Podatke je na spletni strani Kaggle (https://www.kaggle.com/c/ieee-fraud-detection/data) zagotovilo podjetje Vesta. Podatkovni set ima več kot 350 številčnih in kategorični neodvisnih spremenljik. Pomen posameznih spremenljivk ni pojasnjen, so pa definirani naslednji sklopi:
+
+
+\begin{itemize}
+  \item TransactionDT : timedelta from a given reference datetime
+  \item TransactionAMT : transaction payment amount in USD
+  \item ProductCD : product code, the product for each transaction
+  \item card1 - card6 : payment card information, such as card type, card category, issue bank, country, etc.
+  \item addr : address
+  \item dist : distance
+  \item P and R emaildomain : purchaser and recipient email domain
+  \item C1-C14 : counting, such as how many addresses are found to be associated with the payment card, etc. The actual meaning is masked
+  \item D1-D15 : timedelta, such as days between previous transaction, etc.
+  \item M1-M9 : match, such as names on card and address, etc.
+  \item Vxxx: : Vesta engineered rich features, including ranking, counting, and other entity relations
+\end{itemize}
+
+\subsection{Nove spremenljivke}
+Posebno naravo ima spremenljivka \emph{TransactionDT}, ki je periodična. Pomensko nas zanima tedenska perioda, ki jo bomo zajeli tako, da bomo glede na vrednost spremenljivke transakcijo uvrstili v enega izmed sedmih razredov (dni).
+
+\subsection{Priprava podatkov}
+Prvi korak obdelave podatkov je obsegal izbiro kakovostnih spremenljivk glede na delež manjkajočih vrednosti. Odstranili smo tiste spremenljivke, katere dežel manjkajočih vrednosti je presegal 20\%. Večina odstranejenih spremenljivk je imela oznako V (umetno ustvarjene spremenljivke) in D (informacije o časih med transakcijami).
+
+\medskip
+Saj smo opazili, da pri nekaterih spremenljivkah nastopajo vedno enake vrednosti smo nato odstranili tudi tiste spremenljivke, katere varianca je bila praktično nič. Pri tem smo zaradi velikega števila transakcij brez prever s testom ANOVA preverili, da nizka varianca ni posledica neuravnoteženega podatkovnega seta. Testirali smo torej statistično značilnost razlik med povprečij ob in brez prevare.
+
+\medskip
+Analizo bomo izvajali na popolnih podatkih, torej tistih brez manjkajočih vrednosti. Po obdelavi na ostane 346873 transakcij in 96 neodvisnih spremenljivk. Izkaže se, da je količina podatkov prevelika za procesiranje na osebnih računalnikih, zato bomo s pomočjo stratificiranega vzorčenja vzeli le polovico podatkov, ki jih bomo razdelili na dva dela z namenom nepristranske validacije modela.
+
+\subsection{Izbira spremenljivk}
+Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisnih spremenljivk. Saj cilj analize ni iskanje čim boljšega modela temveč primerjava različnih metod se odločimo, da bomo na podlagi random foresta izbrali 20 spremenljivk, ki pripelje do največje klasifikacijske točnosti. Rezultat v primeru 96 spremenljivk poda točnost modela $0.9644 \pm 0.0008$ ter v primeru 20 spremenljivk $0.9686 \pm 0.0012$. Izbrane so bile naslednje spremenljivke:
+
+\begin{itemize}
+  \item TransactionAmt
+  \item card1, card2, card5, card6
+  \item emaildomain
+  \item C1, C2, C6, C9, C11, C13, C14 
+  \item V76, V78, V83, V283, V285, V294, V296
+\end{itemize}
+
+\newpage
+\subsection{Vizualizacija izbiranih spremenljivk}
+\subsection*{TransactionAMT}
+
+***
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{transactionAMT}
+  \end{minipage}%
+  \caption{Histogram zneskov transakcij}
+  \label{fig:1}
+\end{figure}
+
+\newpage
+\subsection*{Card}
+
+***
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{card}
+  \end{minipage}%
+  \caption{Histogrami spremenljivk kategorije card}
+  \label{fig:2}
+\end{figure}
+
+\newpage
+\subsection*{Email domain}
+
+***
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{email}
+  \end{minipage}%
+  \caption{Stolpični diagram email domen plačnika}
+  \label{fig:3}
+\end{figure}
+
+\newpage
+\subsection*{C}
+
+***
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{1\linewidth}
+    \centering
+    \includegraphics{c_variables}
+  \end{minipage}%
+  \caption{Empiričina porazdelitev spremenljivk kategorije C}
+  \label{fig:4}
+\end{figure}
+
+\newpage
+\subsection*{V}
+
+***
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{1\linewidth}
+    \centering
+    \includegraphics{v_variables}
+  \end{minipage}%
+  \caption{Empiričina porazdelitev spremenljivk kategorije V}
+  \label{fig:5}
+\end{figure}
+
+\newpage
+\subsection*{Correlation}
+
+***
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{korelacijska_matrika}
+  \end{minipage}%
+  \caption{Korelacijska matrika med vsemi izbranimi spremenljivkami}
+  \label{fig:6}
+\end{figure}
+
+
+\newpage
+\section{Rezultati}
+Ogledali si bomo rezultate štirih različnih modelov in dveh na podlagi glasovanja. Pri delu z neuravnoteženimi podatki se moramo zavedati zavedljivosti klasifikacijske točnosti. Zato je potrebno, da poznamo dve številki in sicer delež pravilno uvrščenih enot v primeru, da vse enote razvrstimo v skupino 0 (ni prevara) in delež pravilno razvrščenih enot v primeru naključnega razvrščanja ob predpostavki, da so populacijski deleži enaki vzorčnim. Naši referenčni vrednosti sta torej 0.98 in 0.96.  V takšnem primeru je pomemben tudi tip napake oziroma ali se gre za False Positive ali False Negative. Zato bomo poleg klasifikacijske točnosti primerjali tudi Precision (manjhna vrednost nakazuje na veliko število False Positive napak) in Recall (manjhna vrednost nakazuje na veliko število False Negative napak). Ogledali si bomo F1 Score, ki združi prej omenjeni metriki. Vsi modeli so bili ocenjeni na standariziranih podatkih, kakovost modela pa je bila vrednotena na ločeni, testni množici podatkov, ki ni bila del eksploratorne analize in ocenjevanja modela.
+
+\newpage
+\subsection{Logistic regression}
+
+
+\subsection{kNN}
+
+\newpage
+\subsection{Globoke nevronske mreže}
+Globoke nevronske mreže so večnivojske mreže z več skritimi nivoji, ki omogočajo večjo kompleksnost modela. Nevronske mreže so priljubljen alogritem klasifikacije, katera ideja izhaja iz delovanja možganov. Vsaka posamezna enota nevronske mreže ima v prvi fazi dodeljene poljubne uteži (bodisi naključne ali s pridobljene s pomočjo specifične inicializacije). Vhodni podatki so nato propagirani skozi posamezne nivoje nevronske mreže kjer se na vsakem nivoju ponovljena operacija matričnega množenja z utežim trenutnega nivja ter apliciranje aktivacijske funkcije. Vloga aktivacijske funkcije je, da v model vnaša nelinearno preslikavo prejšnega nivja in s tem omogoča kompleksnejši model. Hkrati zalogo vrednosti preslika na omejen interval, najpogosteje med 0 in 1. Ko enkrat izračunamo izhod vseh nivojev nevronske mreže sledi proces optimizacije kriterijske funkcije. V tem procesu s pomočjo optimizacijskih metod prilagjamo modelske uteži in s tem minimiziramo napako. Minimizacijo napake izvajamo v obratnem vrstnem redu glede na strukturo modela kot je pretok podatkov, torej iz zadnje (izhodne) plasti se pomikamo proti začetni (vhodni) plasti. Pomemben del učenja modela je tudi proces regularizacije s katerim poskrbimo, da pri modelu ne pride do preprileganja. To naredimo tako, da pri kriterijski funkciji dodamo dodaten regularizacijski člen (L1, L2) ali pa z metodo dropout, kjer v postopku učenja ob vsaki iteraciji uteži naključnih nevronom postavimo na nič.
+
+\medskip
+Naš model je sestavljen iz štirih nivojev, vhodni, izhodni ter dva skrita (15, 10, 5, 1). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperpolični tangens razen pri izhodni, kjer sem uporabil sigmoidno aktivacijsko funkcijo. Za optimizacijo sem uporabil algoritem \textbf{adam}, ki opzimiriza binarno prečno entropijo. Za regularizacijo sem uporabil postopek dropout pri prvem in drugem nivoju, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov sem pri procesu učenja uporabil treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch)
+sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{nn}
+  \end{minipage}%
+  \label{fig:7}
+\end{figure}
+
+\newpage
+V spodnji tabeli vidimo, da v splošnem klasifikacijska točnost ni boljša kot, če vse enote klasificiramo kot normalne transakcije, je pa boljša v primeru slučajnega razvrščanja. F1 score je zelo majhen predvsem zaradi majhne vrednosti recalla, torej bo večina napak tipa False Negative.
+<<echo = FALSE>>=
+confusionMatrix(as.factor(pred$neuralnetwork), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+@
+
+
+\newpage
+\subsection{Autoencoder}
+Autoencoderji so nevronske mreže s katerimi se lahko naučimo latentno reprezentacijo (encoding) poljubnega podatkovnega seta. Tradicionalno so bili večinoma uporabljeni z namenom zmanjševanja dimenzij podatkov, trenutno pa so aktulani tudi na področju generativnih modelov. V principu delujejo tako, da skozi plasti nevronske mreže zmanjšamo dimenzijo podatkov (kodirnik), ter nato na podlagi te latentne reprezenzacije podatke rekonstruiramo s čim manjšo napako (dekodirnik). Da model deluje je potrebna predpostavka, da so porazdelitve spremenljivk transakcij pri katerih je prisotna prevara drugačne od normalnih. Ideja pri uporabi za klasifikacijo pri neuratnoteženih podatkih je naslednja: saj imamo veliko število normalnih transakcij se naučimo latentno reprezentacijo teh. Ko bomo v z modelom napovedovali transakcije, ob upoštevanju predpostavke pričakujemo, da bo napaka pri rekonstrukciji normalnih transakcij manjša kot, ko je prisotna prevara. Določiti moramo še mejno vrednost napake, na podlagi katere bomo klasificirali transakcije. Vrednost napake določimo glede na željeno metriko, v našem primeru bo to F1.
+
+\medskip
+Naš model je sestavljen iz petih nivojev, vhodni, izhodni ter trije skriti (15, 10, 5, 10, 15). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperpolični tangens. Za optimizacijo sem uporabil algoritem \textbf{adam}, ki opzimiriza povprečen kvadrat napake (MSE). Za regularizacijo sem uporabil postopek dropout za nivojema z desetimi nevroni, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov sem pri procesu učenja uporabil treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch) sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{ae}
+  \end{minipage}%
+  \label{fig:8}
+\end{figure}
+
+\newpage
+V spodnji tabeli vidimo, da je klasifikacijska točnost zelo slaba (0.7049) in ni boljša niti, če vse enote klasificiramo kot normalne transakcije, niti v primeru slučajnega razvrščanja. F1 score je zelo majhen predvsem zaradi majne vrednosti preciznosti, torej bo večina napak tipa False Positive.
+<<echo = FALSE>>=
+confusionMatrix(as.factor(pred$autoencoder), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+@
+
+
+\newpage
+\subsection{Ensamble}
+Tak tip klasifikatorja združuje rezultate večih modelov. Zdržili jih bomo na dva načina, gleda na večinski delež glasov (zaradi sodega števila modelov bomo v primeru deleža 0.5 transakcijo klasificirali kot prevaro) ali z konsenzom vseh glasov. V primeru konsenza bomo transakcijo kot prevaro klasificirali le v primeru, če jo za prevaro označijo vsi štirje algoritmi.
+
+\medskip
+Vidimo, da je najbolje delova ***
+
+<<echo=FALSE>>=
+votes <- cbind(pred$neuralnetwork, pred$autoencoder)
+ensamble_majority <- as.numeric(rowMeans(votes) >= 0.5)
+ensamble_consensus <- as.numeric(rowMeans(votes) == 1)
+@
+
+\subsection*{Večinsko glasovanje}
+<<echo = FALSE>>=
+confusionMatrix(as.factor(ensamble_majority), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+@
+
+\newpage
+\subsection*{Konsenz}
+<<echo = FALSE>>=
+confusionMatrix(as.factor(ensamble_consensus), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+@
+
+
+
+\newpage
+\subsection{Primerjava modelov}
+
+<<echo=FALSE>>=
+GetStats <- function(predicted) {
+  c <- confusionMatrix(as.factor(predicted), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+  c(c$overall[1], c$byClass[5:7])
+}
+stats <- apply(votes, 2, GetStats)
+colnames(stats) <- c('nn', 'ae')
+round(stats, digits = 3)
+@
+
+
+
+\newpage
+\section{Zaključek}\label{Sherec_Conc}
+
+
+
+% \begin{figure}[h]
+%   \centering
+%   \begin{minipage}[b]{0.65\linewidth}
+%     \centering
+%     \includegraphics{Congeneric_measurement_model}
+%   \end{minipage}%
+%   \caption{Quotient estimates in case of two removed questions}
+%   \label{fig:3}
+% \end{figure}
+
+%\bibliographystyle{plain}
+%\bibliography{references}
+
+
+\end{document}
+
+
+
+
