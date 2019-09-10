@@ -48,28 +48,19 @@ p = ggplot() +
   geom_line(aes(x = 1:15, y = accuracy_0, colour="blue"), size=1) +
   geom_line(aes(x = 1:15, y = accuracy_1, colour="red"), size=1) + scale_color_discrete(name = "Razred", labels = c("Fraud", "NotFraud")) + labs(x = "Stevilo sosedov", y="Natacnost") + theme_minimal()
 
-p
 ggsave("./slike/knn_scree.pdf", p, width = 6, height = 6)
 geom_line(data=Summary,aes(y=Y1,x= X,colour="darkblue"),size=1 )
 apply(df_train, 2, function(x) any(is.na(x)))
 
 
-ctrl <- trainControl(method="repeatedcv",repeats = 2)
-knnFit <- train(y_train ~ ., data = df_train[1:10000,], method = "knn", trControl = ctrl ,tuneLength = 4)
-plot(knnFit)
-
-
 lbl = c("TransactionAmt", "card1", "card2", "card5", "card6", "P_emaildomain","V76", "V78", "V83", "V283", "V285", "V294", "V296", "C1", "C2", "C6", "C9", "C11", "C13", "C14")
 
-knn_model = knn(df_train[,lbl], df_test[,lbl], cl=df_train$y_train,k=5, prob = TRUE);
+knn_model = knn(df_train[,lbl], df_test[,lbl], cl=df_train$y_train,k=1, prob = TRUE);
 knn_prob = attr(knn_model, "prob");
 knn_cm = table(knn_model, df_test$y_test)
-knn_cm
 knn_labels =  as.integer(knn_model)
 knn_labels = knn_labels - 1
 
-knn_prob2 = ifelse( knn_labels==0, 1-knn_prob, knn_prob)
-mean(knn_model == df_test$y_test) # Accuracy
 
 
 # Confusion matrix
@@ -96,3 +87,8 @@ data.frame(precision, recall, f1)
 # Average ppc, recall, F-1
 data.frame(mean(precision), mean(recall), mean(f1))
 
+
+
+log_confusion <- confusionMatrix(as.factor(glm_pred), as.factor(df_test_sub$y_test), mode = 'prec_recall', positive = '1')
+saveRDS(log_confusion, file = "log_pred.RDS")
+readRDS("./data/log_pred.RDS")

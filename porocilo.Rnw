@@ -42,6 +42,8 @@ library(caret)
 #cronbach1_simulated <- readRDS("./rds/cronbach1_simulated.rds")
 #povzetek <- readRDS("./rds/povzetek_10_uprasanj.rds")
 pred <- readRDS('./data/pred_nn_ae.RDS')
+knn_pred = readRDS("./data/knn_pred.RDS")
+log_pred <- readRDS("./data/log_pred.RDS")
 @
 
 
@@ -99,7 +101,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
   \centering
   \begin{minipage}[b]{0.8\linewidth}
     \centering
-    \includegraphics{transactionAMT}
+    \includegraphics{transactionAmt}
   \end{minipage}%
   \caption{Histogram zneskov transakcij}
   \label{fig:1}
@@ -189,7 +191,27 @@ Ogledali si bomo rezultate štirih različnih modelov in dveh na podlagi glasova
 \subsection{Logistic regression}
 
 
+<<echo = FALSE>>=
+log_pred
+@
+
 \subsection{kNN}
+
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{knn_scree}
+  \end{minipage}%
+  \label{fig:8}
+\end{figure}
+
+
+<<echo = FALSE>>=
+knn_pred
+@
+
 
 \newpage
 \subsection{Globoke nevronske mreže}
