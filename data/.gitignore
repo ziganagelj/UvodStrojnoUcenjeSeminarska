@@ -6,3 +6,6 @@ test_transaction.csv
 train_identity.csv
 train_transaction.csv
 conf_table_nn_ae.RDS
+knn_napovedi.rds
+log_napovedi.rds
+pred_nn_ae.RDS

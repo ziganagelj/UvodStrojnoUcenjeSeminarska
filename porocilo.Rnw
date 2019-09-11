@@ -41,7 +41,7 @@ library(xtable)
 library(caret)
 #cronbach1_simulated <- readRDS("./rds/cronbach1_simulated.rds")
 #povzetek <- readRDS("./rds/povzetek_10_uprasanj.rds")
-pred <- readRDS('./data/pred_nn_ae.RDS')
+pred <- readRDS('./data/predictions.RDS')
 @
 
 
@@ -196,8 +196,7 @@ Ogledali si bomo rezultate štirih različnih modelov in dveh na podlagi glasova
 Globoke nevronske mreže so večnivojske mreže z več skritimi nivoji, ki omogočajo večjo kompleksnost modela. Nevronske mreže so priljubljen alogritem klasifikacije, katera ideja izhaja iz delovanja možganov. Vsaka posamezna enota nevronske mreže ima v prvi fazi dodeljene poljubne uteži (bodisi naključne ali s pridobljene s pomočjo specifične inicializacije). Vhodni podatki so nato propagirani skozi posamezne nivoje nevronske mreže kjer se na vsakem nivoju ponovljena operacija matričnega množenja z utežim trenutnega nivja ter apliciranje aktivacijske funkcije. Vloga aktivacijske funkcije je, da v model vnaša nelinearno preslikavo prejšnega nivja in s tem omogoča kompleksnejši model. Hkrati zalogo vrednosti preslika na omejen interval, najpogosteje med 0 in 1. Ko enkrat izračunamo izhod vseh nivojev nevronske mreže sledi proces optimizacije kriterijske funkcije. V tem procesu s pomočjo optimizacijskih metod prilagjamo modelske uteži in s tem minimiziramo napako. Minimizacijo napake izvajamo v obratnem vrstnem redu glede na strukturo modela kot je pretok podatkov, torej iz zadnje (izhodne) plasti se pomikamo proti začetni (vhodni) plasti. Pomemben del učenja modela je tudi proces regularizacije s katerim poskrbimo, da pri modelu ne pride do preprileganja. To naredimo tako, da pri kriterijski funkciji dodamo dodaten regularizacijski člen (L1, L2) ali pa z metodo dropout, kjer v postopku učenja ob vsaki iteraciji uteži naključnih nevronom postavimo na nič.
 
 \medskip
-Naš model je sestavljen iz štirih nivojev, vhodni, izhodni ter dva skrita (15, 10, 5, 1). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperpolični tangens razen pri izhodni, kjer sem uporabil sigmoidno aktivacijsko funkcijo. Za optimizacijo sem uporabil algoritem \textbf{adam}, ki opzimiriza binarno prečno entropijo. Za regularizacijo sem uporabil postopek dropout pri prvem in drugem nivoju, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov sem pri procesu učenja uporabil treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch)
-sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
+Naš model je sestavljen iz štirih nivojev, vhodni, izhodni ter dva skrita (15, 10, 5, 1). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperpolični tangens razen pri izhodni, kjer sem uporabil sigmoidno aktivacijsko funkcijo. Za optimizacijo sem uporabil algoritem \textbf{adam}, ki opzimiriza binarno prečno entropijo. Za regularizacijo sem uporabil postopek dropout pri prvem in drugem nivoju, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov sem pri procesu učenja uporabil treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch) sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
 
 \begin{figure}[h]
   \centering
@@ -211,13 +210,13 @@ sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, �
 \newpage
 V spodnji tabeli vidimo, da v splošnem klasifikacijska točnost ni boljša kot, če vse enote klasificiramo kot normalne transakcije, je pa boljša v primeru slučajnega razvrščanja. F1 score je zelo majhen predvsem zaradi majhne vrednosti recalla, torej bo večina napak tipa False Negative.
 <<echo = FALSE>>=
-confusionMatrix(as.factor(pred$neuralnetwork), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+confusionMatrix(as.factor(pred[, 'neuralnetwork']), as.factor(pred[, 'actual']), mode = 'prec_recall', positive = '1')
 @
 
 
 \newpage
 \subsection{Autoencoder}
-Autoencoderji so nevronske mreže s katerimi se lahko naučimo latentno reprezentacijo (encoding) poljubnega podatkovnega seta. Tradicionalno so bili večinoma uporabljeni z namenom zmanjševanja dimenzij podatkov, trenutno pa so aktulani tudi na področju generativnih modelov. V principu delujejo tako, da skozi plasti nevronske mreže zmanjšamo dimenzijo podatkov (kodirnik), ter nato na podlagi te latentne reprezenzacije podatke rekonstruiramo s čim manjšo napako (dekodirnik). Da model deluje je potrebna predpostavka, da so porazdelitve spremenljivk transakcij pri katerih je prisotna prevara drugačne od normalnih. Ideja pri uporabi za klasifikacijo pri neuratnoteženih podatkih je naslednja: saj imamo veliko število normalnih transakcij se naučimo latentno reprezentacijo teh. Ko bomo v z modelom napovedovali transakcije, ob upoštevanju predpostavke pričakujemo, da bo napaka pri rekonstrukciji normalnih transakcij manjša kot, ko je prisotna prevara. Določiti moramo še mejno vrednost napake, na podlagi katere bomo klasificirali transakcije. Vrednost napake določimo glede na željeno metriko, v našem primeru bo to F1.
+Autoencoderji so nevronske mreže s katerimi se lahko naučimo latentno reprezentacijo (encoding) poljubnega podatkovnega seta. Tradicionalno so bili večinoma uporabljeni z namenom zmanjševanja dimenzij podatkov, trenutno pa so aktulani tudi na področju generativnih modelov. V principu delujejo tako, da skozi plasti nevronske mreže zmanjšamo dimenzijo podatkov (kodirnik), ter nato na podlagi te latentne reprezenzacije vhodne podatke rekonstruiramo s čim manjšo napako (dekodirnik). Da model deluje je potrebna predpostavka, da so porazdelitve spremenljivk transakcij pri katerih je prisotna prevara drugačne od normalnih. Ideja pri uporabi za klasifikacijo pri neuratnoteženih podatkih je naslednja: saj imamo veliko število normalnih transakcij se naučimo latentno reprezentacijo teh. Ko bomo v z modelom napovedovali transakcije, ob upoštevanju predpostavke pričakujemo, da bo napaka pri rekonstrukciji normalnih transakcij manjša kot, ko je prisotna prevara. Določiti moramo še mejno vrednost napake, na podlagi katere bomo klasificirali transakcije. Vrednost napake določimo glede na izbrano metriko, v našem primeru bo to F1.
 
 \medskip
 Naš model je sestavljen iz petih nivojev, vhodni, izhodni ter trije skriti (15, 10, 5, 10, 15). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperpolični tangens. Za optimizacijo sem uporabil algoritem \textbf{adam}, ki opzimiriza povprečen kvadrat napake (MSE). Za regularizacijo sem uporabil postopek dropout za nivojema z desetimi nevroni, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov sem pri procesu učenja uporabil treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch) sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
@@ -234,7 +233,7 @@ Naš model je sestavljen iz petih nivojev, vhodni, izhodni ter trije skriti (15,
 \newpage
 V spodnji tabeli vidimo, da je klasifikacijska točnost zelo slaba (0.7049) in ni boljša niti, če vse enote klasificiramo kot normalne transakcije, niti v primeru slučajnega razvrščanja. F1 score je zelo majhen predvsem zaradi majne vrednosti preciznosti, torej bo večina napak tipa False Positive.
 <<echo = FALSE>>=
-confusionMatrix(as.factor(pred$autoencoder), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+confusionMatrix(as.factor(pred[, 'autoencoder']), as.factor(pred[, 'actual']), mode = 'prec_recall', positive = '1')
 @
 
 
@@ -243,44 +242,44 @@ confusionMatrix(as.factor(pred$autoencoder), as.factor(pred$actual), mode = 'pre
 Tak tip klasifikatorja združuje rezultate večih modelov. Zdržili jih bomo na dva načina, gleda na večinski delež glasov (zaradi sodega števila modelov bomo v primeru deleža 0.5 transakcijo klasificirali kot prevaro) ali z konsenzom vseh glasov. V primeru konsenza bomo transakcijo kot prevaro klasificirali le v primeru, če jo za prevaro označijo vsi štirje algoritmi.
 
 \medskip
-Vidimo, da je najbolje delova ***
+Vidimo, da v primeru večinskega glasu je klasifikacijska točnost statistično značilno boljša od referenčne. Večina napak je False Negative. V primeru konsenza klasifikacijska točnost ni statistično značilno različna kot tista, če bi vse enote klasificirali kot normalne. Opazimo, da False Positive napaka ni več prisotna vendar pravilno klasificiramo le eno prevaro.
 
 <<echo=FALSE>>=
-votes <- cbind(pred$neuralnetwork, pred$autoencoder)
-ensamble_majority <- as.numeric(rowMeans(votes) >= 0.5)
-ensamble_consensus <- as.numeric(rowMeans(votes) == 1)
+majority <- as.numeric(rowMeans(pred) >= 0.5)
+consensus <- as.numeric(rowMeans(pred) == 1)
+pred <- cbind(pred, majority, consensus)
 @
 
 \subsection*{Večinsko glasovanje}
 <<echo = FALSE>>=
-confusionMatrix(as.factor(ensamble_majority), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+confusionMatrix(as.factor(pred[, "majority"]), as.factor(pred[, 'actual']), mode = 'prec_recall', positive = '1')
 @
 
 \newpage
 \subsection*{Konsenz}
 <<echo = FALSE>>=
-confusionMatrix(as.factor(ensamble_consensus), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+confusionMatrix(as.factor(pred[, "consensus"]), as.factor(pred[, 'actual']), mode = 'prec_recall', positive = '1')
 @
 
 
 
 \newpage
-\subsection{Primerjava modelov}
+\section{Zaključek}
+Glede na klasifikacijsko točnost je najslabši model autoencoder. Najbolj podobna sta si modela logistične regresije in nevronskih mrež, zelo blizu pa jima je tudi model, ko napovedi določamo s konsenzom, le da je njegov recall precej manjši od prej navedenih modelov. KNN ima najboljše razmerje med preciznostjo in recallom in posledično najboljši F1 score. Zelo blizu mu je tudi, model, ko napovedi določamo na podlagi večinskega glasu. Ta model bi označil tudi kot najboljši, saj edini presega referečno klasifikacijsko točnost, ter ima dobro razmerje med preciznostjo in recallom.
 
 <<echo=FALSE>>=
 GetStats <- function(predicted) {
-  c <- confusionMatrix(as.factor(predicted), as.factor(pred$actual), mode = 'prec_recall', positive = '1')
+  c <- confusionMatrix(as.factor(predicted), as.factor(pred[, 'actual']), mode = 'prec_recall', positive = '1')
   c(c$overall[1], c$byClass[5:7])
 }
-stats <- apply(votes, 2, GetStats)
-colnames(stats) <- c('nn', 'ae')
-round(stats, digits = 3)
+stats <- apply(pred, 2, GetStats)[, -1]
 @
 
-
-
-\newpage
-\section{Zaključek}\label{Sherec_Conc}
+<<echo=FALSE, results=tex>>=
+xtable(stats, caption = 'Metrike končnih modelov',
+       digits = 3,
+       table.placement = '!h')
+@
 
 
 
