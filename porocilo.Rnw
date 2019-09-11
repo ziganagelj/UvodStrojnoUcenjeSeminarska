@@ -49,7 +49,7 @@ pred <- readRDS('./data/predictions.RDS')
 
 
 \section{Uvod}\label{Sec_Intro}
-Cilj naloge je predstaviti in primerjati štiri različnih metod za klasifikacijo na primeru neuravnovešenih podatkov. Gre se za več kot 500 tistoč transakcijskih podatkov različnih tipov na podlagi katerih želimo zaznati prevaro. Za konec bomo v primerjavo dodali še enasamble modelov in sicer v primeru večine glasov ter konsenza.
+Cilj naloge je predstaviti in primerjati štiri različnie metode za klasifikacijo na primeru neuravnovešenih podatkov. Gre se za več kot 500 tisoč transakcijskih podatkov različnih tipov na podlagi katerih želimo zaznati prevaro. Za konec bomo v primerjavo dodali še enasamble modelov in sicer v primeru večine glasov ter konsenza.
 
 \section{Podatki}\label{Sec_Data}
 Podatke je na spletni strani Kaggle (https://www.kaggle.com/c/ieee-fraud-detection/data) zagotovilo podjetje Vesta. Podatkovni set ima več kot 350 številčnih in kategorični neodvisnih spremenljik. Pomen posameznih spremenljivk ni pojasnjen, so pa definirani naslednji sklopi:
@@ -73,16 +73,16 @@ Podatke je na spletni strani Kaggle (https://www.kaggle.com/c/ieee-fraud-detecti
 Posebno naravo ima spremenljivka \emph{TransactionDT}, ki je periodična. Pomensko nas zanima tedenska perioda, ki jo bomo zajeli tako, da bomo glede na vrednost spremenljivke transakcijo uvrstili v enega izmed sedmih razredov (dni).
 
 \subsection{Priprava podatkov}
-Prvi korak obdelave podatkov je obsegal izbiro kakovostnih spremenljivk glede na delež manjkajočih vrednosti. Odstranili smo tiste spremenljivke, katere dežel manjkajočih vrednosti je presegal 20\%. Večina odstranejenih spremenljivk je imela oznako V (umetno ustvarjene spremenljivke) in D (informacije o časih med transakcijami).
+Prvi korak obdelave podatkov je obsegal izbiro kakovostnih spremenljivk glede na delež manjkajočih vrednosti. Odstranili smo tiste spremenljivke, katere delež manjkajočih vrednosti je presegal 20\%. Večina odstranjenih spremenljivk je imela oznako V (dodatne spremenljivke, ki jih je merilo podjetje) in D (informacije o časih med transakcijami).
 
 \medskip
-Saj smo opazili, da pri nekaterih spremenljivkah nastopajo vedno enake vrednosti smo nato odstranili tudi tiste spremenljivke, katere varianca je bila praktično nič. Pri tem smo zaradi velikega števila transakcij brez prever s testom ANOVA preverili, da nizka varianca ni posledica neuravnoteženega podatkovnega seta. Testirali smo torej statistično značilnost razlik med povprečij ob in brez prevare.
+Opazili smo, da pri nekaterih spremenljivkah nastopajo vedno enake vrednosti, zato smo odstranili tudi tiste spremenljivke, katerih varianca je bila praktično nič. Pri tem smo zaradi velikega števila transakcij brez prevar s testom ANOVA preverili, da nizka varianca ni posledica neuravnoteženega podatkovnega seta. Testirali smo torej statistično značilnost razlik med povprečij ob in brez prevare.
 
 \medskip
-Analizo bomo izvajali na popolnih podatkih, torej tistih brez manjkajočih vrednosti. Po obdelavi na ostane 346873 transakcij in 96 neodvisnih spremenljivk. Izkaže se, da je količina podatkov prevelika za procesiranje na osebnih računalnikih, zato bomo s pomočjo stratificiranega vzorčenja vzeli le polovico podatkov, ki jih bomo razdelili na dva dela z namenom nepristranske validacije modela.
+Analizo bomo izvajali na popolnih podatkih, torej na tistih brez manjkajočih vrednosti. Po obdelavi nam ostane 346873 transakcij in 96 neodvisnih spremenljivk. Izkaže se, da je količina podatkov prevelika za procesiranje na običajnih osebnih računalnikih, zato bomo s pomočjo stratificiranega vzorčenja vzeli le polovico podatkov, ki jih bomo razdelili na dva dela z namenom nepristranske validacije modela.
 
 \subsection{Izbira spremenljivk}
-Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisnih spremenljivk. Saj cilj analize ni iskanje čim boljšega modela temveč primerjava različnih metod se odločimo, da bomo na podlagi random foresta izbrali 20 spremenljivk, ki pripelje do največje klasifikacijske točnosti. Rezultat v primeru 96 spremenljivk poda točnost modela $0.9644 \pm 0.0008$ ter v primeru 20 spremenljivk $0.9686 \pm 0.0012$. Izbrane so bile naslednje spremenljivke:
+Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisnih spremenljivk. Saj cilj analize ni iskanje čim boljšega modela temveč primerjava različnih metod strojnega učenja. Na podlagi random foresta bomo izbrali 20 spremenljivk, ki pripelje do največje klasifikacijske točnosti. Rezultat v primeru 96 spremenljivk poda točnost modela $0.9644 \pm 0.0008$ ter v primeru 20 spremenljivk $0.9686 \pm 0.0012$. Izbrane so bile naslednje spremenljivke:
 
 \begin{itemize}
   \item TransactionAmt
@@ -96,7 +96,7 @@ Kljub manjšemu številu transakcij imamo še vedno preveliko število neodvisni
 \subsection{Vizualizacija izbiranih spremenljivk}
 \subsection*{TransactionAmt}
 
-TransactionAmt oz. vrednost prenešenega denarja je edina prava zvezna spremenljivka v naših podatkih. Vidimo, da je spremenljvika približno eksponentno porazdeljena, s barvo, so v vsakem stolpcu označeni deleži transakcij, katere so bile klasificirane kot goljufije. Iz grafa vidimo, da se večina teh zgodi, kadar je vrednost transakcije med 0 in 125.
+\textit{TransactionAmt} oz. vrednost prenešenega denarja je edina prava zvezna spremenljivka v naših podatkih. Vidimo, da je spremenljvika približno eksponentno porazdeljena, s barvo, so v vsakem stolpcu označeni deleži transakcij, katere so bile klasificirane kot goljufije. Iz grafa vidimo, da se večina teh zgodi, kadar je vrednost transakcije med 0 in 125.
 
 \begin{figure}[h]
   \centering
@@ -111,7 +111,7 @@ TransactionAmt oz. vrednost prenešenega denarja je edina prava zvezna spremenlj
 \newpage
 \subsection*{Card}
 
-Spremenljivke tipa \textit{card} skupaj sestavljajo indentifikacijske številke kartic, razen zadnje spremenljivke, ki podaja vrsto kartice. Govoriti o porazdelitvah tukaj nima ravno smisla, saj te vrednosti ne predstavljajo neke zvezne količine. Iz zadnjega grafa vidimo, da imamo v našem vzorcu veliko več transakcij z debitnimi karticami kot pa z kreditnimi.
+Spremenljivke tipa \textit{card} skupaj sestavljajo indentifikacijske številke kartic, razen zadnje spremenljivke, ki podaja vrsto kartice. Govoriti o porazdelitvah tukaj nima ravno smisla, saj te vrednosti ne predstavljajo neke zvezne količine. Iz zadnjega grafa vidimo, da imamo v našem vzorcu veliko več transakcij z debitnimi karticami kot pa s kreditnimi karticami.
 
 \begin{figure}[h]
   \centering
@@ -156,7 +156,7 @@ Spremenljivke tipa C so pravtako kodirane spremenljivke, ki naj bi "merile" atri
 \newpage
 \subsection*{V}
 
-Spremenljivke tipa V so "custom" spremenljivke, ki jih je organizator natečaja "meril" pri transakcijah. Spremenljivke so pravtako zakodirane, zato ne vemo njihovega pravega pomena. Iz normiranih histogramov vidimo, da so spremenljivke V83, V78, V76 podobno porazdeljene, največ vrednosti se nahaja na sredni. Ostalie štiri spremenljivke so tudi medseboj podobno porazdeljene. Iz normiranih histogramov ne moremo razbrati, nobene znane, porazdelitve.
+Spremenljivke tipa V so po meri narejene spremenljivke, ki jih je organizator natečaja "meril" pri transakcijah. Spremenljivke so pravtako zakodirane, zato ne vemo njihovega pravega pomena. Iz normiranih histogramov vidimo, da so spremenljivke V83, V78, V76 podobno porazdeljene, največ vrednosti se nahaja na sredni. Ostale štiri spremenljivke so tudi medseboj podobno porazdeljene. Iz normiranih histogramov ne moremo razbrati, nobene znane, porazdelitve.
 
 \begin{figure}[h]
   \centering
@@ -169,7 +169,7 @@ Spremenljivke tipa V so "custom" spremenljivke, ki jih je organizator natečaja 
 \end{figure}
 
 \newpage
-\subsection*{Correlation}
+\subsection*{Korelacijska matrika}
 
 Iz grafa korelacijske matrike vidimo, da so spremenljivke tipa C zelo močno korelirane med seboj, kar lahko nakazuje na probleme s multikolinearnostjo. Spremenljivke tipa V so medseboj šibko korelirane. Ostale korelacije niso značilne.
 
@@ -213,7 +213,9 @@ Kjer je $Logit(P(x)) = ln(\frac{P(y=1|x)}{1 - P(y=1|x)})$ logaritem razmerja ver
 
 Koeficiente $w$ logistične regresije pa ocenimo tako, da poiščemo take koeficiente, ki maksimizirajo funkcijo logaritem verjetja. To običajno naredimo s numerično optimizacijo kot je gradientni spust.
 
-V spodnji tabeli vidimo rezultate logističnega modela, ki sem ga natreniral s $glm$ ukazom znotraj programa R. Najboljše rezultate sem dosegel, tako da sem vse spremenljivke vključil v model. Zaradi multikolienearnosti C spremeljivk sem poskušal vključiti le eno od njih v model, vendar sem v tem primeru dosegel slabše rezultate. Kakor koli vidimo iz spodnje konfuzijske matrike vidimo, da so rezultati slabi, saj dosegamo slabo natačnost pri klasifikaciji transakcij, ki so goljufive, kar je za nas bolj pomembno kot pravilna klasifikacija transakcij, ki niso goljufive. F1 score je zelo majhen predvsem zaradi majhne vrednosti recalla, torej bo večina napak tipa False Negative.
+V spodnji tabeli vidimo rezultate logističnega modela, ki je bil natreniran s $glm$ ukazom znotraj programa R. Najboljše rezultati so bili doseženi, kadar so bile vse spremenljivke vključene v model. Zaradi multikolienearnosti C spremeljivk smo poskusili vključiti le eno od njih v model, vendar smo v tem primeru dosegeli slabše rezultate. Iz spodnje konfuzijske matrike vidimo, da so rezultati slabi, saj dosegamo slabo natačnost pri klasifikaciji transakcij, ki so goljufive, kar je za nas bolj pomembno kot pravilna klasifikacija transakcij, ki niso goljufive. F1 score je zelo majhen predvsem zaradi majhne vrednosti recalla, torej bo večina napak tipa False Negative.
+
+\pagebreak
 
 <<echo = FALSE>>=
 log_pred
@@ -221,9 +223,9 @@ log_pred
 
 \subsection{kNN}
 
-K-nearest neighbors oz. K-najbližjih sosedov je ne-parametrična statistična metoda, ki jo lahko uporabimo za regresijo ali klasifikacijo. Pri tej metodi ne ocenjujemo nobenih parametrov, ampak direktno uporabimo podatke za napovedovanje. V našem primeru jo bomo uporabili za klasifikacijo transakcij v goljufive in ne goljufive transakcije. Metoda deluje tako, da transakcijo klasificiramo na podlagi klasifikacij k-tih najbližjih sosedov(transakcij). Najbližje sosede pa določimo, tako da izračunamo razdalje med novim podatkom in vsemi ostalimi po vseh spremenljivkah ali featurjih posebaj, nato pa izberemo k najbližjih sosedov in klasificiramo transakcijo, tako, da ji dodelimo razred, ki je najbolj pogost v množici najbližjih transakcij. Za računanje razdalje običajno uporabimo evklidovo razdaljo, obstajajo pa tudi druge. Glavna pomankljivost te metode je prav računska zahtevnost, ki raste exponentno z vsakim novim featurjem ali napovedno spremenljivko, kar se je v našem primeru zelo poznalo.
+K-nearest neighbors oz. K-najbližjih sosedov je ne-parametrična statistična metoda, ki jo lahko uporabimo za regresijo ali klasifikacijo. Pri tej metodi ne ocenjujemo nobenih parametrov, ampak direktno uporabimo podatke za napovedovanje. V našem primeru jo bomo uporabili za klasifikacijo transakcij v goljufive in ne goljufive transakcije. Metoda deluje tako, da transakcijo klasificiramo na podlagi klasifikacij k-tih najbližjih sosedov(transakcij). Najbližje sosede pa določimo, tako da izračunamo razdalje med novim podatkom in vsemi ostalimi podatki po vseh spremenljivkah ali featurjih posebaj, nato pa izberemo k najbližjih sosedov in klasificiramo transakcijo, tako, da ji dodelimo razred, ki je najbolj pogost v množici najbližjih transakcij. Za računanje razdalje običajno uporabimo Evklidovo razdaljo, obstajajo pa tudi druge. Glavna pomankljivost te metode je prav računska zahtevnost, ki raste exponentno z vsakim novim featurjem ali napovedno spremenljivko, kar se je v našem primeru zelo poznalo.
 
-Pri diagnostiki knn modela, si običajno pomagamo s grafom, ki prikazuje natačnost modela v odvisnosti št. sosedov. V našem primeru sem narisal posebaj natačnost za oba razreda, saj je za nas bolj pomebna natančnost pri napovedovanju transakcij, ki so goljufive. Kot vidimo iz grafa, natačnost napovedovanja goljufivih transakcij upada z naraščajočim številom sosedov, zato sem se odličil za $k=1$.
+Pri diagnostiki knn modela, si običajno pomagamo s grafom, ki prikazuje natačnost modela v odvisnosti št. sosedov. V našem primeru sem narisal posebaj natačnost za oba razreda, saj je za nas bolj pomebna natančnost pri napovedovanju transakcij, ki so goljufive. Kot vidimo iz grafa, natačnost napovedovanja goljufivih transakcij upada z naraščajočim številom sosedov, zato smo se odličili za $k=1$.
 
 \begin{figure}[h]
   \centering
@@ -238,6 +240,8 @@ Pri diagnostiki knn modela, si običajno pomagamo s grafom, ki prikazuje natačn
 
 Iz spodnjih rezultatov vidimo, da se je metoda knn odrezala bistveno bolje kot logistična regresija. Odkrili smo za las več kot polovico goljfivih transkacij. Iz tega vidika, je ta model bolšji, kot da bi vzorce razvrščali slučajno. Povprečna natačnost je 0.75, recall in F1 sta tudi visoka kar je dobro. Vendar te metrike nam lahko dajejo lažen občutek o kvaliteti modela, saj je večina napak še vedno False Negative, kar si našem primeru klasifikacije goljufivih modelov ne želimo.
 
+\pagebreak
+
 <<echo = FALSE>>=
 knn_pred
 @
@@ -245,10 +249,10 @@ knn_pred
 
 \newpage
 \subsection{Globoke nevronske mreže}
-Globoke nevronske mreže so večnivojske mreže z več skritimi nivoji, ki omogočajo večjo kompleksnost modela. Nevronske mreže so priljubljen alogritem klasifikacije, katera ideja izhaja iz delovanja možganov. Vsaka posamezna enota nevronske mreže ima v prvi fazi dodeljene poljubne uteži (bodisi naključne ali s pridobljene s pomočjo specifične inicializacije). Vhodni podatki so nato propagirani skozi posamezne nivoje nevronske mreže kjer se na vsakem nivoju ponovljena operacija matričnega množenja z utežim trenutnega nivja ter apliciranje aktivacijske funkcije. Vloga aktivacijske funkcije je, da v model vnaša nelinearno preslikavo prejšnega nivja in s tem omogoča kompleksnejši model. Hkrati zalogo vrednosti preslika na omejen interval, najpogosteje med 0 in 1. Ko enkrat izračunamo izhod vseh nivojev nevronske mreže sledi proces optimizacije kriterijske funkcije. V tem procesu s pomočjo optimizacijskih metod prilagjamo modelske uteži in s tem minimiziramo napako. Minimizacijo napake izvajamo v obratnem vrstnem redu glede na strukturo modela kot je pretok podatkov, torej iz zadnje (izhodne) plasti se pomikamo proti začetni (vhodni) plasti. Pomemben del učenja modela je tudi proces regularizacije s katerim poskrbimo, da pri modelu ne pride do preprileganja. To naredimo tako, da pri kriterijski funkciji dodamo dodaten regularizacijski člen (L1, L2) ali pa z metodo dropout, kjer v postopku učenja ob vsaki iteraciji uteži naključnih nevronom postavimo na nič.
+Globoke nevronske mreže so večnivojske mreže z več skritimi nivoji, ki omogočajo večjo kompleksnost modela. Nevronske mreže so priljubljen alogritem klasifikacije, katera ideja izhaja iz delovanja možganov. Vsaka posamezna enota nevronske mreže ima v prvi fazi dodeljene poljubne uteži (bodisi naključne ali s pridobljene s pomočjo specifične inicializacije). Vhodni podatki so nato propagirani skozi posamezne nivoje nevronske mreže kjer se na vsakem nivoju ponovljena operacija matričnega množenja z utežmi trenutnega nivoja ter apliciranje aktivacijske funkcije. Vloga aktivacijske funkcije je, da v model vnaša nelinearno preslikavo prejšnega nivoja in s tem omogoča kompleksnejši model. Hkrati zalogo vrednosti preslika na omejen interval, najpogosteje med 0 in 1. Ko enkrat izračunamo izhod vseh nivojev nevronske mreže sledi proces optimizacije kriterijske funkcije. V tem procesu s pomočjo optimizacijskih metod prilagjamo modelske uteži in s tem minimiziramo napako. Minimizacijo napake izvajamo v obratnem vrstnem redu glede na strukturo modela kot je pretok podatkov, torej iz zadnje (izhodne) plasti se pomikamo proti začetni (vhodni) plasti. Pomemben del učenja modela je tudi proces regularizacije s katerim poskrbimo, da pri modelu ne pride do preprileganja. To naredimo tako, da pri kriterijski funkciji dodamo dodaten regularizacijski člen (L1, L2) ali pa z metodo dropout, kjer v postopku učenja ob vsaki iteraciji uteži naključnih nevronom postavimo na nič.
 
 \medskip
-Naš model je sestavljen iz štirih nivojev, vhodni, izhodni ter dva skrita (15, 10, 5, 1). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperpolični tangens razen pri izhodni, kjer sem uporabil sigmoidno aktivacijsko funkcijo. Za optimizacijo sem uporabil algoritem \textbf{adam}, ki opzimiriza binarno prečno entropijo. Za regularizacijo sem uporabil postopek dropout pri prvem in drugem nivoju, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov sem pri procesu učenja uporabil treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch) sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
+Naš model je sestavljen iz štirih nivojev, vhodni, izhodni ter dva skrita (15, 10, 5, 1). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperbolični tangens razen pri izhodni, kjer smo uporabili sigmoidno aktivacijsko funkcijo. Za optimizacijo smo uporabili algoritem \textbf{adam}, ki optimizira binarno prečno entropijo. Za regularizacijo smo uporabili postopek dropout pri prvem in drugem nivoju, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov smo pri procesu učenja uporabili treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch) smo nastavili na 100, a smo omogočili možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
 
 \begin{figure}[h]
   \centering
@@ -268,10 +272,10 @@ confusionMatrix(as.factor(pred[, 'neuralnetwork']), as.factor(pred[, 'actual']),
 
 \newpage
 \subsection{Autoencoder}
-Autoencoderji so nevronske mreže s katerimi se lahko naučimo latentno reprezentacijo (encoding) poljubnega podatkovnega seta. Tradicionalno so bili večinoma uporabljeni z namenom zmanjševanja dimenzij podatkov, trenutno pa so aktulani tudi na področju generativnih modelov. V principu delujejo tako, da skozi plasti nevronske mreže zmanjšamo dimenzijo podatkov (kodirnik), ter nato na podlagi te latentne reprezenzacije vhodne podatke rekonstruiramo s čim manjšo napako (dekodirnik). Da model deluje je potrebna predpostavka, da so porazdelitve spremenljivk transakcij pri katerih je prisotna prevara drugačne od normalnih. Ideja pri uporabi za klasifikacijo pri neuratnoteženih podatkih je naslednja: saj imamo veliko število normalnih transakcij se naučimo latentno reprezentacijo teh. Ko bomo v z modelom napovedovali transakcije, ob upoštevanju predpostavke pričakujemo, da bo napaka pri rekonstrukciji normalnih transakcij manjša kot, ko je prisotna prevara. Določiti moramo še mejno vrednost napake, na podlagi katere bomo klasificirali transakcije. Vrednost napake določimo glede na izbrano metriko, v našem primeru bo to F1.
+Autoencoderji so nevronske mreže s katerimi se lahko naučimo latentno reprezentacijo (encoding) poljubnega podatkovnega seta. Tradicionalno so bili večinoma uporabljeni z namenom zmanjševanja dimenzij podatkov, trenutno pa so aktulani tudi na področju generativnih modelov. V principu delujejo tako, da skozi plasti nevronske mreže zmanjšamo dimenzijo podatkov (kodirnik), ter nato na podlagi te latentne reprezenzacije vhodne podatke rekonstruiramo s čim manjšo napako (dekodirnik). Da model deluje je potrebna predpostavka, da so porazdelitve spremenljivk transakcij pri katerih je prisotna prevara drugačne od normalnih. Ideja pri uporabi za klasifikacijo pri neuravnoteženih podatkih je naslednja: ker imamo veliko število normalnih transakcij se naučimo latentno reprezentacijo teh. Ko bomo v z modelom napovedovali transakcije, ob upoštevanju predpostavke pričakujemo, da bo napaka pri rekonstrukciji normalnih transakcij manjša kot, ko je prisotna prevara. Določiti moramo še mejno vrednost napake, na podlagi katere bomo klasificirali transakcije. Vrednost napake določimo glede na izbrano metriko, v našem primeru bo to F1.
 
 \medskip
-Naš model je sestavljen iz petih nivojev, vhodni, izhodni ter trije skriti (15, 10, 5, 10, 15). Pri tem se pri vseh nivojih uporabili aktivacijsko funkcijo hiperpolični tangens. Za optimizacijo sem uporabil algoritem \textbf{adam}, ki opzimiriza povprečen kvadrat napake (MSE). Za regularizacijo sem uporabil postopek dropout za nivojema z desetimi nevroni, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov sem pri procesu učenja uporabil treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch) sem nastavil na 100, a sem omogočil možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
+Naš model je sestavljen iz petih nivojev, vhodni, izhodni ter trije skriti (15, 10, 5, 10, 15). Pri tem se pri vseh nivojih uporabi aktivacijsko funkcijo hiperbolični tangens. Za optimizacijo smo uporabili algoritem \textbf{adam}, ki optmizira povprečen kvadrat napake (MSE). Za regularizacijo smo uporabili postopek dropout za nivojema s desetimi nevroni, kjer ob vsaki iteraciji ``ugasne'' 20\% nevronov. Zaradi velikega števila podatkov smo pri procesu učenja uporabili treniranje na manjših delih podatkov (minibatch) velikost 128 transakcij. Število iteracij učenja (epoch) smo nastavili na 100, a smo omogočili možnost zgodnjega ustavljanja v primeru, če se vrednost kriterijske funkcije ne niža več.
 
 \begin{figure}[h]
   \centering
@@ -284,6 +288,7 @@ Naš model je sestavljen iz petih nivojev, vhodni, izhodni ter trije skriti (15,
 
 \newpage
 V spodnji tabeli vidimo, da je klasifikacijska točnost zelo slaba (0.7049) in ni boljša niti, če vse enote klasificiramo kot normalne transakcije, niti v primeru slučajnega razvrščanja. F1 score je zelo majhen predvsem zaradi majne vrednosti preciznosti, torej bo večina napak tipa False Positive.
+
 <<echo = FALSE>>=
 confusionMatrix(as.factor(pred[, 'autoencoder']), as.factor(pred[, 'actual']), mode = 'prec_recall', positive = '1')
 @
@@ -291,7 +296,7 @@ confusionMatrix(as.factor(pred[, 'autoencoder']), as.factor(pred[, 'actual']), m
 
 \newpage
 \subsection{Ensamble}
-Tak tip klasifikatorja združuje rezultate večih modelov. Zdržili jih bomo na dva načina, gleda na večinski delež glasov (zaradi sodega števila modelov bomo v primeru deleža 0.5 transakcijo klasificirali kot prevaro) ali z konsenzom vseh glasov. V primeru konsenza bomo transakcijo kot prevaro klasificirali le v primeru, če jo za prevaro označijo vsi štirje algoritmi.
+Tak tip klasifikatorja združuje rezultate več različnih modelov. Zdržuili jih bomo na dva načina, gleda na večinski delež glasov (zaradi sodega števila modelov bomo v primeru deleža 0.5 transakcijo klasificirali kot prevaro) ali s konsenzom vseh glasov. V primeru konsenza bomo transakcijo kot prevaro klasificirali le v primeru, če jo za prevaro označijo vsi štirje algoritmi.
 
 \medskip
 Vidimo, da v primeru večinskega glasu je klasifikacijska točnost statistično značilno boljša od referenčne. Večina napak je False Negative. V primeru konsenza klasifikacijska točnost ni statistično značilno različna kot tista, če bi vse enote klasificirali kot normalne. Opazimo, da False Positive napaka ni več prisotna vendar pravilno klasificiramo le eno prevaro.
