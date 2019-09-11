@@ -45,14 +45,14 @@ ggsave("./slike/email.pdf", p, width = 6, height = 6)
 ## V variables
 
 p = df_test %>% select(V76, V78, V83, V283, V285, V294, V296, isFraud) %>% gather(Spremenljivke, value, -isFraud) %>% 
-  ggplot(aes(y = Spremenljivke, fill = as.factor(isFraud),x = percent_rank(value))) + geom_density_ridges(scale=1) + labs(x = "Normalizirane vrednosti", y="Spremenljivke") + theme_minimal()
+  ggplot(aes(y = Spremenljivke,x = percent_rank(value))) + geom_density_ridges(scale=1) + labs(x = "Normalizirane vrednosti", y="Spremenljivke") + theme_minimal()
 
 ggsave("./slike/v_variables.pdf", p, width = 6, height = 6)
 
 
 ## C variables
 p =df_test %>% select(C1, C2, C6, C9, C11, C13, C14, isFraud) %>% gather(Spremenljivke, value, -isFraud) %>% 
-  ggplot(aes(y = Spremenljivke, fill = as.factor(isFraud), x = percent_rank(value)))  + geom_density_ridges(scale=1) + labs(x = "Normalizirane vrednosti", y="Spremenljivke") + theme_minimal()
+  ggplot(aes(y = Spremenljivke, x = percent_rank(value)))  + geom_density_ridges(scale=1) + labs(x = "Normalizirane vrednosti", y="Spremenljivke") + theme_minimal()
 ggsave("./slike/c_variables.pdf", p, width = 6, height = 6)
 
 

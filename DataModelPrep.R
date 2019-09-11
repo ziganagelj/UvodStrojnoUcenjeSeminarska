@@ -51,16 +51,26 @@ data_final_std <- list(x_train = x_train,
 
 saveRDS(data_final_std, './data/data_final_std.RDS')
 
-df <- readRDS('./data/data_final_std.RDS')
+df <- readRDS('./data/data_final_std2.RDS')
+
+pred_knn <- readRDS('./data/knn_napovedi.rds')
+pred_log <- readRDS('./data/log_napovedi.rds')
+pred <- readRDS('./data/pred_nn_ae.RDS')
+pred_nn <- pred$neuralnetwork
+pred_ae <- pred$autoencoder
 
 x_train <- df$x_train
 x_test <- df$x_test
 y_train <- df$y_train
 y_test <- df$y_test
 
-res <- list(actual = y_test,
-            neuralnetwork = pred_nn,
-            autoencoder = pred_ae)
+res <- cbind(actual = y_test[x_test$P_emaildomain != "hotmail.co.uk"],
+            logistic = as.numeric(pred_log),
+            knn = as.numeric(pred_knn),
+            neuralnetwork = pred_nn[x_test$P_emaildomain != "hotmail.co.uk"],
+            autoencoder = pred_ae[x_test$P_emaildomain != "hotmail.co.uk"])
 
-saveRDS(res, './data/pred_nn_ae.RDS')
+df_test_sub <- subset(df_test, P_emaildomain != "hotmail.co.uk")
+
+saveRDS(res, './data/predictions.RDS')
         
