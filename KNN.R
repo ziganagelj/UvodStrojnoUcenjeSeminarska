@@ -11,6 +11,7 @@ df_train$card6 = as.numeric(df_train$card6)
 
 df_test = data$x_test
 df_test$y_test = as.numeric(as.factor(data$y_test))
+df_test <- subset(df_test, P_emaildomain != "hotmail.co.uk") 
 df_test$P_emaildomain = as.numeric(df_test$P_emaildomain)
 df_test$card6 = as.numeric(df_test$card6)
 
@@ -56,12 +57,18 @@ apply(df_train, 2, function(x) any(is.na(x)))
 
 lbl = c("TransactionAmt", "card1", "card2", "card5", "card6", "P_emaildomain","V76", "V78", "V83", "V283", "V285", "V294", "V296", "C1", "C2", "C6", "C9", "C11", "C13", "C14")
 
+
+df_test_sub <- subset(df_test, P_emaildomain != "hotmail.co.uk")
 # Treniranje knn
+
 knn_model = knn(df_train[,lbl], df_test[,lbl], cl=df_train$y_train,k=1, prob = TRUE);
 knn_prob = attr(knn_model, "prob");
 knn_cm = table(knn_model, df_test$y_test)
 knn_labels =  as.integer(knn_model)
 knn_labels = knn_labels - 1
+
+saveRDS(knn_labels, "knn_napovedi.Rds")
+length(knn_model)
 
 
 

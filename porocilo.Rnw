@@ -189,8 +189,30 @@ Iz grafa korelacijske matrike vidimo, da so spremenljivke tipa C zelo močno kor
 Ogledali si bomo rezultate štirih različnih modelov in dveh na podlagi glasovanja. Pri delu z neuravnoteženimi podatki se moramo zavedati zavedljivosti klasifikacijske točnosti. Zato je potrebno, da poznamo dve številki in sicer delež pravilno uvrščenih enot v primeru, da vse enote razvrstimo v skupino 0 (ni prevara) in delež pravilno razvrščenih enot v primeru naključnega razvrščanja ob predpostavki, da so populacijski deleži enaki vzorčnim. Naši referenčni vrednosti sta torej 0.98 in 0.96.  V takšnem primeru je pomemben tudi tip napake oziroma ali se gre za False Positive ali False Negative. Zato bomo poleg klasifikacijske točnosti primerjali tudi Precision (manjhna vrednost nakazuje na veliko število False Positive napak) in Recall (manjhna vrednost nakazuje na veliko število False Negative napak). Ogledali si bomo F1 Score, ki združi prej omenjeni metriki. Vsi modeli so bili ocenjeni na standariziranih podatkih, kakovost modela pa je bila vrednotena na ločeni, testni množici podatkov, ki ni bila del eksploratorne analize in ocenjevanja modela.
 
 \newpage
-\subsection{Logistic regression}
+\subsection{Logistična regresija}
 
+Logistična regresija je regresijski model, katerega lahko uporabimo za klasifikacijo. Z modelom ocenimo verjenost, da se je nek dogodek zgodil na podlagi danih podatkov. Pri logistični regresiji uporabimo naravni logaritem, da "stisnemo" izhodne vrendosti modela med 0 in 1. Enačbo regresije lahko zapišemo kot:
+
+\[ w_0x^0 + w_1x^1 + w_2x^2 + ... w_nx^n = w^Tx = Logit(P(x)) \]
+
+
+Kjer je $Logit(P(x)) = ln(\frac{P(y=1|x)}{1 - P(y=1|x)})$ logaritem razmerja verjetnosti, da se je dogodek zgodil deljeno, da se dogodek ni zgodil. Če zgornjo enačbo antilogaritmiramo in izrazimo ven verjetnost, da se je dogodek zgodil, dobimo model logistične regresije oz. logistično krivuljo, ki modelira nelinearno zvezo med napovednimi spremneljivkami in regresorjem:
+
+\[ P(y=1|x) = \frac{1}{1 + e^{-(w^Tx)}} \]
+
+\begin{figure}[h]
+  \centering
+  \begin{minipage}[b]{0.8\linewidth}
+    \centering
+    \includegraphics{logistic_curve}
+    \caption{Logistična krivulja}
+  \end{minipage}%
+  \label{fig:8}
+\end{figure}
+
+Koeficiente $w$ logistične regresije pa ocenimo tako, da poiščemo take koeficiente, ki maksimizirajo funkcijo logaritem verjetja. To običajno naredimo s numerično optimizacijo kot je gradientni spust.
+
+V spodnji tabeli vidimo rezultate logističnega modela, ki sem ga natreniral s $glm$ ukazom znotraj programa R. Najboljše rezultate sem dosegel, tako da sem vse spremenljivke vključil v model. Zaradi multikolienearnosti C spremeljivk sem poskušal vključiti le eno od njih v model, vendar sem v tem primeru dosegel slabše rezultate. Kakor koli vidimo iz spodnje konfuzijske matrike vidimo, da so rezultati slabi, saj dosegamo slabo natačnost pri klasifikaciji transakcij, ki so goljufive, kar je za nas bolj pomembno kot pravilna klasifikacija transakcij, ki niso goljufive. F1 score je zelo majhen predvsem zaradi majhne vrednosti recalla, torej bo večina napak tipa False Negative.
 
 <<echo = FALSE>>=
 log_pred
@@ -198,6 +220,9 @@ log_pred
 
 \subsection{kNN}
 
+K-nearest neighbors oz. K-najbližjih sosedov je ne-parametrična statistična metoda, ki jo lahko uporabimo za regresijo ali klasifikacijo. Pri tej metodi ne ocenjujemo nobenih parametrov, ampak direktno uporabimo podatke za napovedovanje. V našem primeru jo bomo uporabili za klasifikacijo transakcij v goljufive in ne goljufive transakcije. Metoda deluje tako, da transakcijo klasificiramo na podlagi klasifikacij k-tih najbližjih sosedov(transakcij). Najbližje sosede pa določimo, tako da izračunamo razdalje med novim podatkom in vsemi ostalimi po vseh spremenljivkah ali featurjih posebaj, nato pa izberemo k najbližjih sosedov in klasificiramo transakcijo, tako, da ji dodelimo razred, ki je najbolj pogost v množici najbližjih transakcij. Za računanje razdalje običajno uporabimo evklidovo razdaljo, obstajajo pa tudi druge. Glavna pomankljivost te metode je prav računska zahtevnost, ki raste exponentno z vsakim novim featurjem ali napovedno spremenljivko, kar se je v našem primeru zelo poznalo.
+
+Pri diagnostiki knn modela, si običajno pomagamo s grafom, ki prikazuje natačnost modela v odvisnosti št. sosedov. V našem primeru sem narisal posebaj natačnost za oba razreda, saj je za nas bolj pomebna natančnost pri napovedovanju transakcij, ki so goljufive. Kot vidimo iz grafa, natačnost napovedovanja goljufivih transakcij upada z naraščajočim številom sosedov, zato sem se odličil za $k=1$.
 
 \begin{figure}[h]
   \centering
@@ -208,6 +233,9 @@ log_pred
   \label{fig:8}
 \end{figure}
 
+\newpage
+
+Iz spodnjih rezultatov vidimo, da se je metoda knn odrezala bistveno bolje kot logistična regresija. Odkrili smo za las več kot polovico goljfivih transkacij. Iz tega vidika, je ta model bolšji, kot da bi vzorce razvrščali slučajno. Povprečna natačnost je 0.75, recall in F1 sta tudi visoka kar je dobro. Vendar te metrike nam lahko dajejo lažen občutek o kvaliteti modela, saj je večina napak še vedno False Negative, kar si našem primeru klasifikacije goljufivih modelov ne želimo.
 
 <<echo = FALSE>>=
 knn_pred

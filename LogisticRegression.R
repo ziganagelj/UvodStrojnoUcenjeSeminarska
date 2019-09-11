@@ -1,6 +1,6 @@
 library(class)
 library(caret)
-
+library(car)
 
 data <- readRDS("./data/data_final_std2.rds")
 
@@ -10,18 +10,24 @@ df_train$y_train = data$y_train
 df_test = data$x_test
 df_test$y_test = data$y_test
 
-logit_fit = glm(y_train ~  .,data = df_train, family="binomial")
+logit_fit = glm(y_train ~  . ,data = df_train, family="binomial")
+vif(logit_fit)
+
 summary(logit_fit)
 
 
 df_test_sub <- subset(df_test, P_emaildomain != "hotmail.co.uk") # Izpustimo ker pri treniranju nismo "videli" takega primera
+
 glm_prob = predict(logit_fit, newdata = df_test_sub, type="response", se.fit=FALSE)
 glm_pred = ifelse(glm_prob > 0.5, 1, 0)
-
-
+length(glm_pred)
+saveRDS(glm_pred, "log_napovedi.Rds")
 # # Confusion matrix
-# cm = table(glm_pred, df_test_sub$y_test)
-# 
+cm = table(glm_pred, df_test_sub$y_test)
+cm
+
+
+
 # n = sum(cm)
 # bc = nrow(cm)
 # rowsums = apply(cm, 1, sum)
